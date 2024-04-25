@@ -1,0 +1,35 @@
+configurations {
+    ktlint
+}
+
+dependencies {
+    ktlint(libs.ktlint) {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
+        }
+    }
+}
+
+tasks.register("ktlint", JavaExec) {
+    group = "verification"
+    description = "Check Kotlin code style."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    // see https://github.com/pinterest/ktlint#usage for more
+    args "**/src/**/*.kt",
+        "--color",
+        "--editorconfig=${rootDir}/.editorconfig",
+        "--reporter=checkstyle,output=${buildDir}/ktlint.xml",
+        "--reporter=html,output=${buildDir}/ktlint.html",
+        "--reporter=plain"
+}
+
+tasks.register("ktlintFormat", JavaExec) {
+    group = "formatting"
+    description = "Fix Kotlin code style deviations."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "-F",
+        "**/src/**/*.kt",
+        "--editorconfig=${rootDir}/.editorconfig"
+}
